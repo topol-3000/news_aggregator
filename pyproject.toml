@@ -1,0 +1,20 @@
+[tool.ruff]
+line-length = 120
+target-version = "py313"
+fix = true
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]  # Errors, Flake8, Imports (basic sanity checks)
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
+force-single-line = false
+split-on-trailing-comma = true
+known-first-party = ["src"]
+section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
+
+[tool.ruff.format]
+quote-style = "single"
+line-ending = "lf"
+docstring-code-format = true
+skip-magic-trailing-comma = true

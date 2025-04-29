@@ -1,0 +1,9 @@
+from enum import StrEnum
+
+
+class ErrorCode(StrEnum):
+    UNKNOWN_ERROR = "000001"
+
+    UNHANDLED_SERVER_ERROR = "100001"
+    UNHANDLED_DATABASE_ERROR = "100002"
+    INTERNAL_DATABASE_ERROR = "100003"
