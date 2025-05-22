@@ -1,7 +1,7 @@
 from enum import Enum
 from pathlib import Path
 
-from pydantic import AmqpDsn, BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, AnyUrl
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 BASE_DIR = Path(__file__).resolve()
@@ -50,18 +50,9 @@ class LoggerSettings(BaseModel):
     level: LogLevel = LogLevel.DEBUG
 
 
-class CelerySettings(BaseModel):
-    main_module: str
-    broker_url: AmqpDsn
-    with_ssl: bool = False
-
-    @model_validator(mode="after")
-    def validate_broker(self) -> "CelerySettings":
-        if not str(self.broker_url).startswith(("amqp://", "amqps://")):
-            raise ValueError(
-                "Celery broker_url must be an AMQP URL (amqp:// or amqps://)"
-            )
-        return self
+# class CelerySettings(BaseModel):
+#     broker_url: AnyUrl
+#     backend_url: AnyUrl
 
 
 class Settings(BaseSettings):
@@ -69,7 +60,7 @@ class Settings(BaseSettings):
     api: APISettings = APISettings()
     db: DatabaseSettings
     logger: LoggerSettings = LoggerSettings()
-    celery: CelerySettings
+    # celery: CelerySettings
 
     model_config = SettingsConfigDict(
         env_file=(BASE_DIR / ".env",),

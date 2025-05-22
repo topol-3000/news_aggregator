@@ -37,7 +37,7 @@ class Database:
         )
 
     @asynccontextmanager
-    async def get_session(self) -> AsyncGenerator[AsyncSession]:
+    async def get_session(self) -> AsyncGenerator[AsyncSession, None]:
         """
         Provide an asynchronous context manager for an SQLAlchemy session.
 
@@ -79,7 +79,7 @@ class Database:
 database = Database(settings.db)
 
 
-async def get_session() -> AsyncGenerator[AsyncSession]:
+async def get_session() -> AsyncGenerator[AsyncSession, None]:
     async with database.get_session() as session:
         yield session
 

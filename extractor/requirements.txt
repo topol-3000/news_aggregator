@@ -1,0 +1,6 @@
+feedparser
+requests
+psycopg2-binary
+python-dotenv
+openai
+apache-airflow-providers-postgres

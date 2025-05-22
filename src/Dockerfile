@@ -1,4 +1,4 @@
-FROM python:3.13-alpine
+FROM python:3.12-alpine
 
 ENV PYTHONBUFFERED 1
 
@@ -9,4 +9,4 @@ COPY Pipfile Pipfile.lock ./
 RUN python -m pip install --upgrade pip && pip install pipenv
 RUN pipenv install --dev --system --deploy
 
-COPY src/ .
+COPY . .

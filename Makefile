@@ -3,9 +3,8 @@
 # =================================================
 
 # Configuration variables
-DOCKER_COMPOSE_FILE = docker-compose.dev.yml
 BACKEND_ENV_FILE =  src/.env
-DOCKER_COMPOSE_CMD = docker compose -f ${DOCKER_COMPOSE_FILE} --env-file ${BACKEND_ENV_FILE}
+DOCKER_COMPOSE_CMD = docker compose
 
 # Colors for better readability
 CYAN = \033[0;36m
@@ -74,7 +73,10 @@ down:
 
 build-up:
 	@echo "${CYAN}Building and starting containers...${RESET}"
-	@${DOCKER_COMPOSE_CMD} up --build --detach
+	@${DOCKER_COMPOSE_CMD} up airflow-init
+	@#export AIRFLOW_UID=$$(id -u) && ${DOCKER_COMPOSE_CMD} up airflow-init
+	@make build
+	@make up
 
 logs:
 	@echo "${CYAN}Showing container logs (press Ctrl+C to exit)...${RESET}"
@@ -93,12 +95,12 @@ generate-migration:
 		exit 1; \
 	fi
 	@echo "${CYAN}Generating migration: $(name)${RESET}"
-	@${DOCKER_COMPOSE_CMD} --profile tools run --rm --user $$(id -u):$$(id -g) migrations \
+	@${DOCKER_COMPOSE_CMD} --profile tools run --rm --user $$(id -u):$$(id -g) octopus_migrations \
 		sh -c "alembic revision --autogenerate -m '$(name)'"
 
 migrate-up-latest:
 	@echo "${CYAN}Running migrations up to latest version...${RESET}"
-	@${DOCKER_COMPOSE_CMD} --profile tools run --rm migrations sh -c "alembic upgrade head"
+	@${DOCKER_COMPOSE_CMD} --profile tools run --rm octopus_migrations sh -c "alembic upgrade head"
 
 migrate-up:
 	@if [ -z "$(n)" ]; then \
@@ -106,11 +108,11 @@ migrate-up:
 		exit 1; \
 	fi
 	@echo "${CYAN}Running $(n) migrations up...${RESET}"
-	@${DOCKER_COMPOSE_CMD} --profile tools run --rm migrations sh -c "alembic upgrade +$(n)"
+	@${DOCKER_COMPOSE_CMD} --profile tools run --rm octopus_migrations sh -c "alembic upgrade +$(n)"
 
 migrate-down-previous:
 	@echo "${CYAN}Reverting previous migration...${RESET}"
-	@${DOCKER_COMPOSE_CMD} --profile tools run --rm migrations sh -c "alembic downgrade -1"
+	@${DOCKER_COMPOSE_CMD} --profile tools run --rm octopus_migrations sh -c "alembic downgrade -1"
 
 migrate-down:
 	@if [ -z "$(n)" ]; then \
@@ -118,14 +120,14 @@ migrate-down:
 		exit 1; \
 	fi
 	@echo "${CYAN}Reverting $(n) migrations...${RESET}"
-	@${DOCKER_COMPOSE_CMD} --profile tools run --rm migrations sh -c "alembic downgrade -$(n)"
+	@${DOCKER_COMPOSE_CMD} --profile tools run --rm octopus_migrations sh -c "alembic downgrade -$(n)"
 
 # =================================================
 # DEVELOPMENT TOOLS
 # =================================================
 rebuild-tools:
 	@echo "${CYAN}Rebuilding development tools...${RESET}"
-	@${DOCKER_COMPOSE_CMD} build migrations
+	@${DOCKER_COMPOSE_CMD} build octopus_migrations
 	@${DOCKER_COMPOSE_CMD} build dev-tools
 
 ruff:
@@ -149,11 +151,16 @@ prepare-env-files:
 	@echo "${CYAN}Preparing environment files...${RESET}"
 	@if [ ! -f src/.env ]; then \
 		cp .env.backend.example ${BACKEND_ENV_FILE}; \
-		echo "${GREEN}Environment files prepared successfully${RESET}"; \
+		echo "${GREEN}Environment file for backend prepared successfully${RESET}"; \
 	else \
-		echo "${YELLOW}Environment file already exists, skipping${RESET}"; \
+		echo "${YELLOW}Environment file for backend already exists, skipping${RESET}"; \
+	fi
+	@if [ ! -f .env ]; then \
+		echo "${GREEN}Generating AIRFLOW_UID and FERNET_KEY...${RESET}"; \
+		. ./generate_airflow_env.sh; \
+	else \
+		echo "${YELLOW}Environment file for airflow already exists, skipping${RESET}"; \
 	fi
 
-# Complete project setup in one command
 setup: prepare-env-files build-up
 	@echo "${GREEN}Setup complete!${RESET}"

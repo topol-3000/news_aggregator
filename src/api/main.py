@@ -15,7 +15,7 @@ logger: Logger = get_logger(__name__)
 
 
 @asynccontextmanager
-async def lifespan(_: FastAPI) -> AsyncGenerator[Any, Any]:
+async def lifespan(_: FastAPI) -> AsyncGenerator[None, None]:
     logger.info("Starting API server")
     yield
     logger.info("Gracefully shutdown API server")
