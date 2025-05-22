@@ -17,7 +17,7 @@ The application consists of several services:
 
 ### Prerequisites
 - Docker and Docker Compose
-- Make (optional, for using the Makefile commands)
+- Make
 
 ### Setup and Run
 
@@ -29,7 +29,7 @@ cd news-aggregator
 
 2. Start the services:
 ```bash
-make build-up
+make setup
 ```
 
 3. Access the API documentation:
@@ -37,6 +37,21 @@ make build-up
 http://localhost:8000/docs
 ```
 
+#### Setup Airflow
+```
+http://localhost:8080/
+```
+1. Setup the `openai_api_key` Variable in airflow, you can get it here:
+```
+https://platform.openai.com/
+```
+
+2. Setup the postgresql connection to the backend DB to save the articles.
+3. Setup the extractor urls Variables.
+```
+Variable name: rss_ukrainska_pravda_feed
+Where to get: www.pravda.com.ua 
+```
 
 ## License
 
